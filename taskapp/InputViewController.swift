@@ -9,14 +9,17 @@ import UIKit
 import RealmSwift
 import UserNotifications
 
-class InputViewController: UIViewController {
+class InputViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     @IBOutlet weak var titleTextField: UITextField!
     @IBOutlet weak var contentsTextView: UITextView!
     @IBOutlet weak var datePicker: UIDatePicker!
-
+    @IBOutlet weak var categoryPicker: UIPickerView!
+    
     let realm = try! Realm()
     var task: Task!
-
+    var categories = try! Realm().objects(Category.self).sorted(byKeyPath: "id", ascending: true)
+    var categoryId = 0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -24,9 +27,20 @@ class InputViewController: UIViewController {
         let tapGesture: UITapGestureRecognizer = UITapGestureRecognizer(target:self, action:#selector(dismissKeyboard))
         self.view.addGestureRecognizer(tapGesture)
 
+        // 過去の日付を選択できないようにする
+        datePicker.minimumDate = Date()
+        
+        // カテゴリの初期値設定
+        let index = categories.firstIndex(where: { $0.id == task.categoryId }) ?? 0
+        self.categoryPicker.selectRow(index, inComponent: 0, animated: false)
+        
         titleTextField.text = task.title
         contentsTextView.text = task.contents
         datePicker.date = task.date
+        categoryId = task.categoryId
+        
+        categoryPicker.delegate = self
+        categoryPicker.dataSource = self
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -34,6 +48,7 @@ class InputViewController: UIViewController {
             self.task.title = self.titleTextField.text!
             self.task.contents = self.contentsTextView.text
             self.task.date = self.datePicker.date
+            self.task.categoryId = self.categoryId
             self.realm.add(self.task, update: .modified)
         }
         
@@ -80,7 +95,30 @@ class InputViewController: UIViewController {
         }
     }
 
-    @objc func dismissKeyboard() {
+    // UIPickerViewの列の数
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    // UIPickerViewの行数、リストの数
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return categories.count
+    }
+    
+    // UIPickerViewの最初の表示
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return categories[row].name
+    }
+    
+    // UIPickerViewのRowが選択された時の挙動
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        self.categoryId = categories[row].id
+    }
+    
+    @IBAction func unwind(_ segue: UIStoryboardSegue) {
+    }
+
+    @objc func dismissKeyboard(){
         // キーボードを閉じる
         view.endEditing(true)
     }
