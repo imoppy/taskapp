@@ -24,14 +24,14 @@ class InputCategoryViewController: UIViewController {
 
     @IBAction func buttonPressed(_ sender: Any) {
         try! realm.write {
-            self.category.name = self.categoryNameTextField.text!
+            self.category.name = categoryNameTextField.text!
 
             let allCategories = realm.objects(Category.self)
             if allCategories.count != 0 {
                 self.category.id = allCategories.max(ofProperty: "id")! + 1
             }
 
-            self.realm.add(self.category)
+            self.realm.add(category)
         }        
     }
     

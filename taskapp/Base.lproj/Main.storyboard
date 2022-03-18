@@ -30,17 +30,29 @@
                                     </tableViewCell>
                                 </prototypes>
                             </tableView>
+                            <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7aT-Oz-wIm">
+                                <rect key="frame" x="0.0" y="88" width="414" height="216"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </pickerView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="vhS-1Y-dIV" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="6Wq-DG-Ikp"/>
+                            <constraint firstItem="7aT-Oz-wIm" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Cnm-4J-ILi"/>
+                            <constraint firstItem="7aT-Oz-wIm" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="V3x-9S-rdz"/>
+                            <constraint firstItem="7aT-Oz-wIm" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="WOw-eB-ndr"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="vhS-1Y-dIV" secondAttribute="trailing" id="jhd-zw-IDv"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="vhS-1Y-dIV" secondAttribute="bottom" id="poy-fj-c3O"/>
                             <constraint firstItem="vhS-1Y-dIV" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="r90-Ln-VRo"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="cje-KS-3ec">
+                        <barButtonItem key="leftBarButtonItem" title="カテゴリ: すべて" style="plain" id="olj-9A-zNu">
+                            <connections>
+                                <action selector="selectCategoryButtonTapped:" destination="BYZ-38-t0r" id="FEw-wp-P5G"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="tQv-yA-Qht">
                             <connections>
                                 <segue destination="Nhq-g2-52N" kind="show" id="Mn9-vI-jye"/>
@@ -48,6 +60,8 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="pickerView" destination="7aT-Oz-wIm" id="4Vj-VB-IJL"/>
+                        <outlet property="selectCategoryButton" destination="olj-9A-zNu" id="Byc-Zu-Xhk"/>
                         <outlet property="tableView" destination="vhS-1Y-dIV" id="oyp-ck-ktX"/>
                         <segue destination="Nhq-g2-52N" kind="show" identifier="cellSegue" id="BAM-kn-NZ8"/>
                     </connections>
@@ -187,9 +201,9 @@
                     </view>
                     <navigationItem key="navigationItem" id="dxz-5C-K5J"/>
                     <connections>
-                        <outlet property="categoryPicker" destination="0mQ-W4-Hnr" id="hWR-hc-M7G"/>
                         <outlet property="contentsTextView" destination="6pP-ox-7yR" id="Ktx-yL-6ZO"/>
                         <outlet property="datePicker" destination="IEm-xW-h2j" id="gqi-L4-MAA"/>
+                        <outlet property="pickerView" destination="0mQ-W4-Hnr" id="hWR-hc-M7G"/>
                         <outlet property="titleTextField" destination="2C2-Ak-7uo" id="gws-H7-6qq"/>
                     </connections>
                 </viewController>

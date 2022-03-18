@@ -8,13 +8,16 @@
 import UIKit
 import RealmSwift
 import UserNotifications
+import SafariServices
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource {
     @IBOutlet weak var tableView: UITableView!
-    
+    @IBOutlet weak var pickerView: UIPickerView!
+    @IBOutlet weak var selectCategoryButton: UIBarButtonItem!
+
     let realm = try! Realm()
-    
-    var taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
+    var tasks = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
+    var categories = try! Realm().objects(Category.self).sorted(byKeyPath: "id", ascending: true)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,18 +25,26 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         tableView.fillerRowHeight = UITableView.automaticDimension
         tableView.delegate = self
         tableView.dataSource = self
+
+        pickerView.delegate = self
+        pickerView.dataSource = self
+        pickerView.isHidden = true
     }
-    
+
+    override func viewWillAppear(_ animated: Bool) {
+        pickerView.reloadAllComponents()
+    }
+
     // データの数（＝セルの数）を返すメソッド
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return taskArray.count
+        return tasks.count
     }
     
     // 各セルの内容を返すメソッド
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
      
-        let task = taskArray[indexPath.row]
+        let task = tasks[indexPath.row]
         cell.textLabel?.text = task.title
 
         let formatter = DateFormatter()
@@ -59,7 +70,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             // 削除するタスクを取得する
-            let task = self.taskArray[indexPath.row]
+            let task = self.tasks[indexPath.row]
 
             // ローカル通知をキャンセルする
             let center = UNUserNotificationCenter.current()
@@ -80,13 +91,48 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             }
         }
     }
+
+    // UIPickerViewの列の数
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
     
+    // UIPickerViewの行数、リストの数
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return categories.count + 1
+    }
+    
+    // UIPickerViewの最初の表示
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return row == 0 ? "すべて" : categories[row - 1].name
+    }
+    
+    // UIPickerViewのRowが選択された時の挙動
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        var categoryName = ""
+        if row == 0 {
+            categoryName = "すべて"
+            self.tasks = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
+        } else {
+            let category = categories[row - 1]
+            categoryName = category.name
+            self.tasks = try! Realm().objects(Task.self).filter("categoryId == %@", category.id).sorted(byKeyPath: "date", ascending: true)
+        }
+        tableView.reloadData()
+        selectCategoryButton.title = "カテゴリ: \(categoryName)"
+        pickerView.isHidden = true
+    }
+
+    @IBAction func selectCategoryButtonTapped(_ sender: Any) {
+        pickerView.isHidden = false
+    }
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let inputViewController:InputViewController = segue.destination as! InputViewController
 
         if segue.identifier == "cellSegue" {
             let indexPath = self.tableView.indexPathForSelectedRow
-            inputViewController.task = taskArray[indexPath!.row]
+            inputViewController.task = tasks[indexPath!.row]
         } else {
             let task = Task()
 

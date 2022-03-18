@@ -13,7 +13,7 @@ class InputViewController: UIViewController, UIPickerViewDelegate, UIPickerViewD
     @IBOutlet weak var titleTextField: UITextField!
     @IBOutlet weak var contentsTextView: UITextView!
     @IBOutlet weak var datePicker: UIDatePicker!
-    @IBOutlet weak var categoryPicker: UIPickerView!
+    @IBOutlet weak var pickerView: UIPickerView!
     
     let realm = try! Realm()
     var task: Task!
@@ -30,26 +30,28 @@ class InputViewController: UIViewController, UIPickerViewDelegate, UIPickerViewD
         // 過去の日付を選択できないようにする
         datePicker.minimumDate = Date()
         
-        // カテゴリの初期値設定
-        let index = categories.firstIndex(where: { $0.id == task.categoryId }) ?? 0
-        self.categoryPicker.selectRow(index, inComponent: 0, animated: false)
-        
         titleTextField.text = task.title
         contentsTextView.text = task.contents
         datePicker.date = task.date
         categoryId = task.categoryId
         
-        categoryPicker.delegate = self
-        categoryPicker.dataSource = self
+        pickerView.delegate = self
+        pickerView.dataSource = self
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        pickerView.reloadAllComponents()
+        let index = categories.firstIndex(where: { $0.id == task.categoryId }) ?? 0
+        self.pickerView.selectRow(index, inComponent: 0, animated: false)
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         try! realm.write {
-            self.task.title = self.titleTextField.text!
-            self.task.contents = self.contentsTextView.text
-            self.task.date = self.datePicker.date
-            self.task.categoryId = self.categoryId
-            self.realm.add(self.task, update: .modified)
+            self.task.title = titleTextField.text!
+            self.task.contents = contentsTextView.text
+            self.task.date = datePicker.date
+            self.task.categoryId = categoryId
+            self.realm.add(task, update: .modified)
         }
         
         setNotification(task: task)
